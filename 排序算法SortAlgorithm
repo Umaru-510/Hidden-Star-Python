@@ -1,0 +1,312 @@
+#  ！/usr/bin/env  python
+#  -*- coding:utf-8 -*-
+# @Time   :  2020
+# @Author :  马路UMARU
+# @Email  :  1248060903@qq.com
+# @Blog   :  https://blog.csdn.net/giao马路
+# @Note   :
+import time
+# 原始冒泡排序
+
+def BubbleSort(sort):
+    for i in range(0,len(sort)-1):
+        # 每次内层遍历都维持最后i位顺序
+        for u in range(0,len(sort)-i-1):
+            if sort[u] > sort[u+1]:
+                sort[u], sort[u + 1] = sort[u + 1], sort[u]
+    return sort
+
+# 优化冒泡排序
+
+def ABubbleSort(sort):
+    time1 = time.time()
+    LastExchangeIndex = 0
+    Border = len(sort) - 1
+    for i in range(0,len(sort)-1):
+        isSorted = True
+        for u in range(0,Border):
+            if sort[u] > sort[u + 1]:
+                sort[u], sort[u + 1] = sort[u + 1], sort[u]
+                isSorted = False
+                LastExchangeIndex = u
+        Border = LastExchangeIndex
+        if isSorted:
+            break
+    time2 = time.time()
+    print(sort)
+    print(time2 - time1)
+    return sort
+
+# 鸡尾酒排序
+
+def CocktailSort(sort):
+    time1 = time.time()
+    sortsize = len(sort)
+    sign = True
+    for i in range(0,int(sortsize / 2)):
+        if sign:
+            LastExchangeIndex = 0
+            RightBorder = sortsize - 1
+            LeftBorder = 0
+            sign = False
+            # 奇数轮 从左向右
+            for u in range(LeftBorder, RightBorder):
+                if sort[u] > sort[u + 1]:
+                    sort[u], sort[u + 1] = sort[u + 1], sort[u]
+                    # RightBorder 是无序数组的右边界index
+                    LastExchangeIndex = u
+            RightBorder = LastExchangeIndex
+            # 偶数轮 从右向左
+            for j in range(RightBorder, LeftBorder, -1):
+                if sort[j] < sort[j - 1 ]:
+                    sort[j], sort[j - 1] = sort[j - 1], sort[j]
+                    # LeftBorder 是无序数组的左边界index
+                    LeftBorder = j
+                    # 完成一次排序
+                    sign = True
+        else:
+            break
+    print(sort)
+    time2 = time.time()
+    print(time2 - time1)
+    return sort
+
+# 双边快速排序（分治法）
+
+def QuickSort1(sort):
+    if len(sort) < 2:
+        return sort
+    else:
+        pivot = sort[0]
+        left, right = [], []
+        sort.remove(pivot)
+        for i in sort:
+            if i > pivot:
+                right.append(i)
+            else:
+                left.append(i)
+        return QuickSort1(left) + [pivot] + QuickSort1(right)
+
+
+def QuickSort2(sort, startIndex, endInedx):
+    if startIndex >= endInedx:
+        return
+    pivotIndex = Partition1(sort, startIndex, endInedx)
+    QuickSort2(sort, startIndex, pivotIndex - 1)
+    QuickSort2(sort, pivotIndex - 1, endInedx)
+
+
+def Partition1(sort, startIndex, endInedx):
+    pivot = sort[startIndex]
+    left = startIndex
+    right = endInedx
+    while left != right:
+        while left < right and sort[right] > pivot:
+            right -= 1
+        while left < right and sort[left] <= pivot:
+            left -= 1
+        if left < right:
+            sort[left], sort[right] = sort[right], sort[left]
+    sort[startIndex] = sort[left]
+    sort[left] = pivot
+    return left
+
+
+# 单边快速排序（分治法）
+
+def Partition(sort, left, right):
+    pivot = sort[left]
+    mark = left + 1
+    for i in range(left + 1, right + 1):
+        if sort[i] < pivot:
+            sort[i], sort[mark] = sort[mark], sort[i]
+            mark += 1
+        print(sort)
+    sort[left], sort[mark - 1] = sort[mark - 1], sort[left]
+    return mark - 1
+
+
+def _QuickSortHalf(sort, left, right):
+    if left < right:
+        pivot = Partition(sort, left, right)
+        _QuickSortHalf(sort, left, pivot - 1)
+        _QuickSortHalf(sort, pivot + 1, right)
+
+
+def QuickSortHalf(sort):
+    left, right = 0, len(sort) - 1
+    _QuickSortHalf(sort, left, right)
+
+
+# 非递归双边快速排序
+
+def QuickSort_ND(sort):
+    if len(sort) < 2:
+        return sort
+    stack = []
+    stack.append(len(sort) - 1)
+    stack.append(0)
+    while stack:
+        print(stack)
+        left = stack.pop()
+        right = stack.pop()
+        index = Partition_ND(sort, left, right)
+        if left < index - 1:
+            stack.append(index - 1)
+            stack.append(left)
+        if right > index + 1:
+            stack.append(right)
+            stack.append(index + 1)
+    print(sort)
+    return sort
+
+
+def Partition_ND(sort, startIndex, endInedx):
+    pivot = sort[startIndex]
+    left = startIndex
+    right = endInedx
+    while left != right:
+        while left < right and sort[right] > pivot:
+            right -= 1
+        while left < right and sort[left] <= pivot:
+            left += 1
+        if left < right:
+            sort[left], sort[right] = sort[right], sort[left]
+    sort[startIndex] = sort[left]
+    sort[left] = pivot
+    return left
+
+
+# 堆排序
+
+def HeapSort(sort):
+    if sort is []:
+        return []
+    sorted_list = sort
+    length = len(sorted_list)
+    for i in range(0, length // 2)[::-1]:
+        HeapAdjust(sorted_list, i, length)
+    for j in range(1, length)[::-1]:
+        temp = sorted_list[j]
+        sorted_list[j] = sorted_list[0]
+        sorted_list[0] = temp
+        HeapAdjust(sorted_list, 0, j)
+    print(sorted_list)
+    return sorted_list
+
+
+def HeapAdjust(sort, parent, length):
+    temp = sort[parent]
+    child = parent * 2 + 1
+    while child < length:
+        if child + 1 < length and sort[child] < sort[child + 1]:
+            child += 1
+        if temp > sort[child]:
+            break
+        sort[parent] = sort[child]
+        parent = child
+        child = 2 * child + 1
+    sort[parent] = temp
+
+
+list0 = [7, 5, 6, 9, 8, 10, 3, 2, 4]
+
+
+# 计数排序
+
+def CounterSort(sort):
+    maxnum = sort[0]
+    minnum = sort[0]
+    for i in range(0,len(sort)):
+        if sort[i] > maxnum:
+            maxnum = sort[i]
+        if sort[i] < minnum:
+            minnum = sort[i]
+
+    wid = maxnum - minnum + 1
+    tempArr = [0 for i in range(wid)]
+    resArr = list(range(len(sort)))
+    for num in sort:
+        tempArr[num-minnum] += 1
+    for j in range(1,wid):
+        tempArr[j] = tempArr[j] + tempArr[j - 1]
+    for i in range(len(sort)-1, -1, -1):
+        resArr[tempArr[sort[i]-minnum]-1] = sort[i]
+        tempArr[sort[i] - minnum] -= 1
+    return resArr
+
+
+# 桶排序
+
+def BucketSort(sort,bucketnum):
+    if len(sort) <= 1:
+        return sort
+    maxNum = sort[0]
+    minNum = sort[0]
+    for i in range(1,len(sort)):
+        if sort[i] < minNum:
+            minNum = sort[i]
+        if sort[i] >= maxNum:
+            maxNum = sort[i]
+    bucketSize = (maxNum - minNum + 1) // bucketnum
+    bucket = [[] for i in range(bucketnum)]
+    # 桶内排序
+    for i in range(len(sort)):
+        bucket[(sort[i] - minNum) // bucketSize].append(sort[i])
+    for i in range(bucketnum):
+        QuickSort_ND(bucket[i])
+    res = []
+    for i in range(len(bucket)):
+        for j in range(len(bucket[i])):
+            res.append(bucket[i][j])
+    print(res)
+    return res
+
+
+# 归并排序
+
+def MergeSort1(sort):
+    if len(sort) <= 1:
+        return sort
+    middle = int(len(sort) / 2)
+    left = MergeSort1(sort[:middle])
+    right = MergeSort1(sort[middle:])
+    res = []
+    while left and right:
+        res.append(left.pop(0) if left[0] <= right[0] else right.pop(0))
+    res.extend(right if right else left)
+    return res
+
+
+def MergeSort2(sort):
+    if len(sort) == 1:
+        return sort
+    middle = len(sort) // 2
+    left = sort[:middle]
+    right = sort[middle:]
+    leftl = MergeSort2(left)
+    rightl = MergeSort2(right)
+    return Merge(leftl, rightl)
+
+
+def Merge(left, right):
+    res = []
+    while len(left) > 0 and len(right) > 0:
+        if left[0] <= right[0]:
+            res.append(left.pop(0))
+        else:
+            res.append(right.pop(0))
+    res += left
+    res += right
+    return res
+
+
+# 基数排序
+
+def RadixSort(sort,d):
+    for i in range(d):
+        bucket = [[] for i in range(10)]
+        for j in sort:
+            bucket[int(j / (10 ** i) % 10)].append(j)
+        res = [a for b in bucket for a in b]
+    return res
